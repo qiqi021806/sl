@@ -179,4 +179,30 @@
     - 与URL请求地址中的参数对应，位于？后面
     - 参数的格式是键值对，如：key1=value1
     - 多个参数之间，使用&连接，如： key1=value1&key2=value2 
-    
+    - 案例/views/v8_get
+- POST属性
+    - QueryDict类型的对象
+    - 包含post请求方式的所有参数
+    - 与form表单中的控件对应
+    - 表单中空间必须有name属性，name为键，value为值
+        - checkbox存在一键多值的问题
+    - 键是开发人员定下来的，值是可变的。
+    - 案例ShowViews/view/v9_post
+        - settings中设置模板位置（已经设置完毕）
+        - 设置get页面的urls和函数
+            #'''python
+                east/urls.py
+                需要在路由文件中添加两个路由
+                url(r'v9_get/',v.v9_get),
+                url(r'v9_post/',v.v9_post),
+            '''                        
+            #'''python
+                def v9_get(request):
+                    return render_to_response('for_post.html').format
+                def v9_post(request):
+                    rst = ''
+                    for k,v in request.POST.items():
+                        rst += k + '-->' + v
+                        rst += ','
+                    return HttpResponse('Get value of Request is {0}'.format(rst))
+            '''
