@@ -206,3 +206,204 @@
                         rst += ','
                     return HttpResponse('Get value of Request is {0}'.format(rst))
             '''
+- 手动编写视图            
+    - 实验目的
+        - 利用django快捷函数手动编写视图处理函数
+        - 编写过程中理解视图运行原理
+    - 分析：
+        - django把所有的请求信息封装入request
+        - django通过urls模块把相应请求跟事件处理函数链起来，并把request作为参数传入
+        - 在相应的处理函数中，我们需要完成两个部分
+            - 处理业务
+            - 把结果封装并返回，我们可以使用简单HttpResponse,同样也可以自己处理此功能
+        - 本案例不介绍业务处理，把目光集中在如何渲染结果并返回   
+    - render(request,template_name[,context][,context_instance][,content_type])
+        - 使用模板和一个给定的上下文环境，返回一个渲染的HttpResponse对象
+        - request:django的传入请求
+        - template_name:模板名称
+        - content_instance:上下文环境
+        - 案例参考代码 teacher_app/views/render_test
+    - render_to_response    
+        - 根据给定的上下文字典渲染给定模板，返回渲染后的HttpResponse 
+- 系统内建视图
+    - 系统内建视图，可以直接使用
+    - 404 
+        - defaults.page_not_found(request,template_name='404.html')
+        - 系统引发Http404时触发
+        - 默认窗体request_path变量给模板，即导致错误的URL
+        - DEBUG=TRUE 则不会调用404，取而代之是调试信息
+        - 404视图会被传递一个RequestContext对象并且可以访问模板上下文处理器提供的变量
+    - 500（server error）
+        - defaults.server_error(request,template_name='500.html')
+        - 需要DEBUG=False,否则不调用
+    - 403（HTTP，Forbidden）视图
+        - defaults.permission_denied(request,template_name='403.html')
+        - 通过触发PermissionDenied触发
+    - 400（bad request)视图
+        - defaults.bad_request(request,template_name='400.html')
+        - DEBUG=False
+# 8、基于类的视图
+- 和基于函数的视图的优势和区别：
+    - HTTP方法的method可以有各自的方法，不需要使用条件分支解决
+    - 可以使用OOP及时（例如：Mixin）
+- 概述
+    - 核心是允许使用不同的实例方法来响应不同的HTTP请求方法，而避开条件分支实现
+    - as_view函数作为类的可调用入库，该方法创建一个实例并调用dispatch方法，按照请求方法
+    方法没有定义，则引发HttpResponseNotAllowed
+- 类属性使用
+    - 在类定义时直接覆盖
+    - 在调用as_vies的时候直接作为参数使用，例如：
+
+# models 模型
+- ORM 
+    - ObjectRelationMap:把面向对象思想转换成关系数据库
+    - 类对应表格
+    - 类中的属性对应表中的字段
+    - 在gjango中，models负责跟数据库交互
+- django链接数据库
+    - 自带默认数据库Sqllite3
+        - 关系型数据库
+        - 轻量级
+    - 建议开发用sqllite3,部署用mysql之类数据库
+         - 切换数据库在settings中设置
+         #django连接mysql
+            '''
+            DATABASES = [
+                'default' = {
+                    'ENGINE':'django.db.backends.mysql',
+                    'NAME':'数据库名',
+                    'PASSWORD':'数据库密码'
+                    'HOST':'127.0.0.1'
+                    'PORT':'3306'
+                }
+            ]    
+            '''
+        - 需要在项目文件下的__init__文件中导入pymysql包
+        # 导入数据包
+            '''
+           import pymysql
+           pymysql.install_as_MySQldb() 
+            '''
+# models类的使用
+- 定义和数据库表映射的类
+    - 在应用中的models.py文件中定义class
+    - 所有需要使用ORM的class都必须是models.model的子类
+    - class中所有的属性对应表格中的字段
+    - 字段的类型都必须使用models.xxx 不能使用python中的类型
+- 字段常用的参数
+    - 1、max_length:规定数值的最大长度
+    - 2、blank : 是否允许字段为空，默认不允许
+    - 3、null:在DB中控制是否保存为NULL，默认为false
+    - 4、default：默认值
+    - 5、unique : 唯一
+    - 6、verbose_name: 假名
+- 数据库的迁移
+    - 1、在命令行中，生成数据库迁移的语句（生成sql语句）
+    #迁移
+         '''
+        python3 manage.py makemigrations    
+         '''
+    - 2、在命令行中，输入数据迁移的指令
+    #迁移
+        '''
+        python3 manage.py migrate
+        '''
+        ps： 如果迁移中出现没有变化或者报错，可以尝试强制迁移
+    #强制迁移命令
+        '''
+        python3 manage.py makemigrations 应用名
+        python3 manage.py migrate 应用名
+        '''
+    - 3、对于默认数据库，为了避免出现混乱，如果数据库中没有数据，可以删掉自带的sqlite3数据库删除
+    
+- 4、查看数据库中的数据
+    - 1、 启用命令行：python3 manage.py shell
+        - ps：注意点，对ORM的操作分为静态函数和非静态函数两种，静态是指在内存中只有一份，
+    - 2、 在命令行中带入对应的映射类
+        - from 应用.models import 类名
+    - 3、 使用objects属性操作数据库，objects是模型中实际和数据库进行交互的
+            
+    - 4、 查询命令
+        - 类名.objects.all()查询数据库表中的所有内容，返回的结果是一个Query
+        - 类名.objects.filter(条件)
+    - 5、 保存数据
+        - save()
+        - 常用查找方法
+        - 1、通用查找格式：属性名__（用下面的内容） = 值
+            - gt：大于
+            - gte:大于等于
+            - lt: 小于
+            - lte: 小于等于
+            - range:范围
+            - year: 年份
+            - isnull: 是否为空   
+        - 2、查找等于指定值得格式：属性名=值
+        - 3、模糊查找： 属性名__（使用下面的内容） = 值
+            - exact : 精确等于
+            - iexact : 不区分大小写
+            - contains : 包含
+            - startwith : 以..开头
+            - endwith : 以...结尾    
+            
+
+# 数据库关系
+- 多表联查，利用多个表联合查找某一项或者多项信息。
+    - 1：1  oneToOne
+        - 建立关系，在模型任意一边即可，使用OneToOneField
+        - add:
+    # 添加数据
+            - 添加没有关系的一边，直接实例化保存就可以
+     
+                >>> s = School()
+                >>> s.school_id = 2
+                >>> s.school_name = '河南工业大学'
+                >>> s.save()
+    # 实例化           
+           - 添加有关系的一边，使用create方法或者使用实例化、
+                # 方法1
+                >>> m = Manager()
+                >>> m.manager_id = 10
+                >>> m.manager_name = '大拿'
+                >>> m.my_school = s
+                >>> m.save()
+                # 方法2
+                >>> m = Manager.objects.create(manager_id=20,manager_name='二钠',my_school=ss[0])
+        - Query:
+            - 有子表查母表，由子表的属性直接提取信息。
+            >>> Manager.objects.get(manager_name='二钠').my_school.school_name
+            - 由母表查子表，使用双下滑线
+            >>> s = School.objects.get(manager__manager_name='大拿')
+        - change:
+            - 单个修改使用save
+            - 批量修改使用update
+            - 无论对子表还是对母表的修改
+        - delete:
+            - 直接使用delete进行删除。
+            
+    - 1:N OneToMany
+        - 一个表格的一个数据项/对象等，可以有很多个另一个表格的数据项。
+        - 比如：一个学校可以有很多个老师，但一个老师只能在一个学校里上班。
+        - 使用上：
+            - 使用ForeignKey
+            - 在多的那一边，比如上边的例子就是在Teacher的表格里进行定义
+        - Add:
+            - 跟一对一方法类似，通过create和new来添加    
+            - create: 把属性都填满，然后不需要手动保存
+            - new:可以属性或者参数为空，必须用save保存。
+        - Query: 
+            - 以学校和老师例子为准。
+            - 如果知道老师，查学校，则通过增加的关系属性，直接使用
+            - 例如：查找t1老师，是哪个学校的。  
+            - 反查：
+                - 有学校，我想查下这个学校所有老师，则需要在老师模型名称的小写下直接加下划线set,
+                    用来表示 
+                    >>> ss[1].teacher_set.all()
+       
+    - N:N ManyToMany
+        - 表示任意一个表的数据可以拥有对方表格多项数据，反之亦然，
+        - 比如典型例子就是老师和学生关系。
+        - 使用上，在任意一方，使用MangToMany 定义，只需要定义一边
+        - Add：
+            - 添加老师，则在student.teachers.add()
+        - Query:
+            - 查询。
