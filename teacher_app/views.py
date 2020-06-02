@@ -40,7 +40,70 @@ def v9_post(request):
         rst += ','
     return HttpResponse('Get value of Request is {0}'.format(rst))
 
+def render_test(request):
+    # 环境变量
+    #c = dict()
+    rsp = render(request,"render.html")
+    return rsp
 
 
+def render2_test(request):
+    # 环境变量
+    c = dict()
+    c['name']='Shao Liang '
+    c['name2'] = 'Shao 1 Liang '
+    c['name3'] = 'Shao 2 Liang '
+    rsp = render(request,"render2.html",context=c)
+    return rsp
 
+def render3_test(request):
+    from django.template import loader
 
+    # 得到模板
+    t = loader.get_template("render2.html")
+    r = t.render({'name':'liudana','name2':'shaoliang'})
+    return HttpResponse(r)
+
+def render4_test(request):
+    # 反馈回模板render2.html
+    rsp = render_to_response('render2.html',context={'name':'shaoliang'})
+    return rsp
+
+def get404(r):
+    from django.views import defaults
+    return defaults.page_not_found(r,template_name='render.html')
+
+def one(r):
+    rsp = render(r, "one.html")
+    return rsp
+
+def two(r):
+    #  用来存放想模板中传递的数据
+    ct = dict()
+    ct['name'] = '王晓静'
+    rsp = render(r, "two.html",context=ct)
+    return rsp
+
+def three(r):
+    #  用来存放想模板中传递的数据
+    ct = dict()
+    ct['score']=[99,87,23,100,83,96]
+    rsp = render(r, "three.html",context=ct)
+    return rsp
+
+def four(r):
+    #  用来存放想模板中传递的数据
+    ct = dict()
+    ct['name']='李晓静'
+    rsp = render(r, "four.html",context=ct)
+    return rsp
+
+def five_get(r):
+
+    rsp = render(r, "five_get.html")
+    return rsp
+
+def five_post(r):
+    print(r.POST)
+    rsp = render(r, "one.html")
+    return rsp

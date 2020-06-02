@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>第四个例子</title>
+</head>
+<body>
+{% if name == '王晓静' %}
+
+    <h1>{{name}}, 你好，一别十年，你还好吗？ 窗外一人人来人往，依然有爱情在游荡。
+    </h1>
+
+{% elif name == '张晓静' %}
+
+    <h1>{{name}}, 你好，还记得大民湖畔的夏雨荷么。
+    </h1>
+{% else %}
+    <h1>
+    {{name}}, 走开，不认识你。
+    </h1>
+{% endif %}
+
+</body>
+</html>
